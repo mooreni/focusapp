@@ -1,0 +1,111 @@
+---
+globs: *.ts,*.tsx,*.js,*.jsx
+description: Comprehensive code commenting standards
+---
+
+# Code Commenting Standards
+
+## Function Documentation
+
+Every function MUST have a doc comment above it:
+
+```typescript
+/**
+ * Calculates the slouch angle from shoulder and spine landmarks.
+ * 
+ * This function takes the detected body landmarks from MediaPipe and
+ * calculates the angle between the shoulders and spine. A larger angle
+ * indicates more slouching (poor posture).
+ * 
+ * @param shoulders - Object containing left and right shoulder coordinates {x, y, z}
+ * @param spine - Array of spine landmark coordinates from neck to lower back
+ * @returns The slouch angle in degrees (0-90, where 0 is perfect posture)
+ * 
+ * @example
+ * const angle = calculateSlouchAngle(
+ *   { left: {x: 0.3, y: 0.4, z: 0}, right: {x: 0.7, y: 0.4, z: 0} },
+ *   [{x: 0.5, y: 0.3, z: 0}, {x: 0.5, y: 0.6, z: 0}]
+ * );
+ */
+function calculateSlouchAngle(shoulders, spine) {
+  // Implementation...
+}
+```
+
+## Complex Logic Comments
+
+When code is doing something non-obvious, add explanatory comments:
+
+```typescript
+// We check if the user has been slouching for 30+ seconds before alerting.
+// This prevents false positives from temporary movements like reaching
+// for a drink or adjusting position.
+if (slouchDuration > SLOUCH_THRESHOLD) {
+  triggerAlert();
+}
+```
+
+## Learning Comments
+
+Add educational comments for concepts that junior developers might not know:
+
+```typescript
+// IPC (Inter-Process Communication) allows the renderer process (our UI)
+// to talk to the main process (Electron). Think of it like sending messages
+// between the browser window and the desktop app shell.
+ipcRenderer.send('start-camera');
+```
+
+## State/Hook Comments
+
+Explain what state variables are tracking:
+
+```typescript
+// Tracks whether the camera is currently active and streaming.
+// We use this to show/hide the privacy indicator in the UI.
+const [isCameraActive, setIsCameraActive] = useState(false);
+
+// Stores the last time we sent an alert to the user.
+// Used to implement alert throttling so we don't spam them.
+const [lastAlertTime, setLastAlertTime] = useState<number | null>(null);
+```
+
+## Configuration Comments
+
+Explain magic numbers and configuration values:
+
+```typescript
+// Default work session is 25 minutes (Pomodoro technique)
+const DEFAULT_WORK_DURATION = 25 * 60 * 1000; // in milliseconds
+
+// Alert cooldown: don't send another alert for the same issue
+// within 5 minutes to avoid annoying the user
+const ALERT_COOLDOWN = 5 * 60 * 1000;
+```
+
+## Type Definition Comments
+
+Document complex types:
+
+```typescript
+/**
+ * Represents a detected posture issue that needs user attention.
+ * 
+ * @property type - The category of issue (slouching, looking-away, etc)
+ * @property severity - How bad the issue is (1-10 scale)
+ * @property duration - How long the issue has persisted in seconds
+ * @property timestamp - When the issue was first detected
+ */
+interface PostureAlert {
+  type: 'slouching' | 'looking-away' | 'phone-usage' | 'absent';
+  severity: number;
+  duration: number;
+  timestamp: number;
+}
+```
+
+## Remember
+- Comments should explain WHY, not just WHAT
+- Write comments for your future self and other learners
+- If you have to think about what code does, add a comment
+- Good comments make code self-teaching

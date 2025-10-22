@@ -1,0 +1,600 @@
+---
+alwaysApply: true
+---
+
+<!-- 2c4bb830-71d1-4783-84d8-42f0de43f3a8 8d5ba448-cd53-445c-97cb-959fdef4edeb -->
+**This is the structure plan of this project. EVERY ACTION IN THIS PROJECT SHOULD FOLLOW AND BE ACCORDING TO THIS PLAN!!**
+# Focus Assistant Desktop App Plan - "Flowly"
+
+## Architecture Overview
+
+**Desktop Application:** Electron + Next.js (cross-platform: Windows, Mac, Linux)
+
+**Camera Processing:** MediaPipe Pose Detection (local, browser-based ML)
+
+**AI Responses:** Pre-written message library (default) + Optional OpenAI GPT-4o-mini API (user provides own key)
+
+**Audio Output:** Platform-specific native TTS (Windows Speech API, macOS Speech Synthesis, Linux espeak)
+
+**Privacy-First:** All video processing stays local on user's device, no authentication required
+
+## Tech Stack
+
+- **Frontend:** Next.js 14+ (React) with TypeScript
+- **Desktop Wrapper:** Electron (for native OS integration, cross-platform)
+- **Packaging:** electron-builder (creates installers for Windows, Mac, Linux)
+- **IPC Communication:** Context Bridge pattern (secure main/renderer communication)
+- **ML Library:** MediaPipe Pose Detection (TensorFlow.js, runs locally)
+- **State Management:** Zustand (lightweight, performant, with persist middleware)
+- **UI Components:** shadcn/ui (already configured) + Tailwind CSS
+- **Database:** SQLite via better-sqlite3 (synchronous, fast, single-file database)
+- **TTS:** Platform-specific native TTS (Windows SAPI, macOS Speech Synthesis, Linux espeak)
+- **APIs:** OpenAI GPT-4o-mini (optional, user provides own key)
+
+## Core Features to Build
+
+### 1. Camera Access & Permission Management
+
+- Request camera permissions via Electron's native dialog
+- Display camera feed in app (preview mode)
+- Privacy indicator when camera is active
+- Toggle to pause monitoring
+
+### 2. Posture & Focus Detection System
+
+**MediaPipe Implementation:**
+
+- Detect key body landmarks (shoulders, head, spine alignment)
+- Track head orientation (looking away, down at phone)
+- Calculate slouch angle from shoulder/spine positions
+- Implement time-based thresholds (30 seconds default)
+
+**Detection Triggers:**
+
+- Slouching (shoulders hunched, head forward)
+- Looking away (head turned >45 degrees for 30+ seconds)
+- Looking down at phone (head tilted down significantly)
+- No presence detected (user left)
+
+### 3. Work/Rest Timer System
+
+- User-configurable work intervals (default: 25 minutes)
+- User-configurable rest intervals (default: 5 minutes)
+- Visual countdown timer display
+- Notifications at interval boundaries
+- Pause/resume/reset controls
+- Timer history/statistics
+
+### 4. AI-Powered Response Generation
+
+**OpenAI Integration:**
+
+- Send context to GPT-4o-mini: `{type: "slouching", duration: 45, sessionTime: 25, mood: "encouraging"}`
+- Generate varied, contextual messages
+- Cache recent responses to reduce API calls
+- Fallback to pre-written messages if API fails
+- User preference for tone (encouraging/strict/humorous)
+
+### 5. Text-to-Speech Audio System
+
+- Integrate Windows Speech Synthesis API via Electron
+- Voice selection (available Windows voices)
+- Volume and speed controls
+- Test voice button in settings
+
+### 6. Settings & Customization
+
+- Work/rest duration configuration
+- Detection sensitivity sliders
+- Alert frequency limits (don't spam user)
+- Voice and audio preferences
+- OpenAI API key input (user brings their own key)
+- Privacy controls and data usage display
+
+### 7. Dashboard & Statistics
+
+- Session history (work sessions completed)
+- Posture quality metrics over time
+- Focus time vs distraction time graphs
+- Weekly/monthly reports
+- Export data option
+
+## File Structure
+
+```
+FocusApp/
+├── electron/
+│   ├── main.js                 # Electron main process
+│   ├── preload.js             # Bridge between main/renderer
+│   └── tts.js                 # Windows TTS integration
+├── app/
+│   ├── dashboard/
+│   │   └── page.tsx           # Main dashboard with camera feed
+│   ├── settings/
+│   │   └── page.tsx           # Settings page
+│   ├── timer/
+│   │   └── page.tsx           # Work/rest timer view
+│   └── stats/
+│       └── page.tsx           # Statistics and history
+├── components/
+│   ├── camera-feed.tsx        # Camera preview component
+│   ├── posture-detector.tsx   # MediaPipe integration
+│   ├── work-timer.tsx         # Timer component
+│   ├── alert-system.tsx       # Visual alerts component
+│   └── settings-panel.tsx     # Settings UI
+├── lib/
+│   ├── mediapipe-pose.ts      # Posture detection logic
+│   ├── openai-client.ts       # OpenAI API integration
+│   ├── alert-manager.ts       # Alert logic & throttling
+│   ├── timer-engine.ts        # Work/rest timer logic
+│   └── storage.ts             # Local data persistence
+├── hooks/
+│   ├── use-camera.ts          # Camera access hook
+│   ├── use-posture.ts         # Posture detection hook
+│   └── use-timer.ts           # Timer management hook
+└── types/
+    └── index.ts               # TypeScript definitions
+```
+
+## Implementation Steps
+
+### Phase 1: Electron Setup
+
+1. Install Electron dependencies: `electron`, `electron-builder`, `concurrently`
+2. Configure `electron/main.js` with window creation and camera permissions
+3. Set up IPC communication between Electron and Next.js
+4. Configure build scripts in `package.json`
+5. Test basic Electron app launches Next.js correctly
+
+### Phase 2: Camera & MediaPipe Integration
+
+1. Install MediaPipe/TensorFlow.js: `@mediapipe/pose`, `@tensorflow/tfjs`
+2. Create camera access component with permission handling
+3. Implement MediaPipe Pose detection on video stream
+4. Calculate posture metrics (slouch detection algorithm)
+5. Implement head orientation tracking
+6. Add time-threshold logic (30-second default)
+
+### Phase 3: Work/Rest Timer
+
+1. Create timer state management (work/rest modes)
+2. Build countdown timer UI component
+3. Implement pause/resume/reset functionality
+4. Add timer completion notifications
+5. Store user preferences (work duration, rest duration)
+6. Integrate timer with detection system
+
+### Phase 4: Alert System
+
+1. Create alert manager with throttling (avoid spam)
+2. Integrate OpenAI GPT-4o-mini client
+3. Build prompt templates with context injection
+4. Implement response caching mechanism
+5. Add fallback messages for offline/API failure
+6. Create Windows TTS integration via Electron IPC
+7. Test audio playback and voice options
+
+### Phase 5: Settings & UI Polish
+
+1. Build settings page with all customization options
+2. Implement OpenAI API key secure storage
+3. Add voice preview and selection
+4. Create sensitivity adjustment controls
+5. Build privacy controls (pause monitoring, clear data)
+6. Add visual indicators (camera active, session status)
+
+### Phase 6: Statistics & Dashboard
+
+1. Implement local data storage (SQLite or JSON)
+2. Track session data (duration, alerts, posture quality)
+3. Create statistics visualization components
+4. Build history view with filtering
+5. Add data export functionality
+6. Create weekly/monthly summary reports
+
+### Phase 7: Testing & Optimization
+
+1. Test camera performance on different hardware
+2. Optimize MediaPipe processing (reduce CPU usage)
+3. Test alert timing and frequency
+4. Verify Windows TTS works correctly
+5. Add error handling and recovery
+6. Optimize app startup time and memory usage
+
+## Key Technical Considerations
+
+**Camera Processing Performance:**
+
+- Run MediaPipe at 15-30 FPS (balance accuracy vs CPU)
+- Use Web Workers if processing blocks UI
+- Implement frame skipping under high CPU load
+
+**Privacy & Security:**
+
+- Never store video frames or images
+- Keep all ML processing in memory only
+- Securely store OpenAI API key (Electron safeStorage)
+- Clear explanation of data usage in UI
+- Option to work completely offline (disable LLM)
+
+**Alert Intelligence:**
+
+- Don't alert more than once every 5 minutes for same issue
+- Respect user's break time (no alerts during rest periods)
+- Progressive alerts (gentle reminder → stronger nudge)
+- Learn user patterns (morning sluggishness vs afternoon energy)
+
+**Offline Functionality:**
+
+- Posture detection works completely offline
+- Timers work offline
+- TTS works offline (Windows built-in)
+- Only LLM responses need internet
+- Cache common responses for offline use
+
+## Cost Breakdown
+
+**Development:**
+
+- Free (using existing tools and libraries)
+
+**User Running Costs:**
+
+- Camera processing: Free (local)
+- Windows TTS: Free (built-in)
+- OpenAI API: ~$0.50/month per user (assuming 100 alerts/day)
+- Total: **~$0.50/month** per user
+
+**Optional Cost Optimizations:**
+
+- Pre-generate 100 varied responses during onboarding (one-time $0.05 cost)
+- Use these cached responses, only generate new ones occasionally
+- Could reduce ongoing cost to near-zero while maintaining variety
+
+## User Experience Flow
+
+1. **First Launch:**
+
+   - Onboarding: Explain privacy model (local processing)
+   - Request camera permission
+   - Enter OpenAI API key (or use pre-written messages)
+   - Set work/rest preferences (default: 25/5 minutes)
+   - Calibration: Sit in good posture for baseline
+
+2. **Daily Use:**
+
+   - Start work session from dashboard
+   - Camera monitors in background (small preview visible)
+   - Timer counts down work interval
+   - Gentle alerts when posture degrades
+   - Break reminders at interval end
+   - Statistics update in real-time
+
+3. **Settings Access:**
+
+   - Pause monitoring temporarily
+   - Adjust sensitivity and timing
+   - Change voice/audio preferences
+   - View privacy information
+   - Export data
+
+## Future Enhancement Ideas
+
+- Multi-monitor detection (looking at second screen)
+- Keyboard/mouse activity correlation (typing vs idle)
+- Desk exercises suggestions during breaks
+- Integration with calendar (no alerts during meetings)
+- Machine learning personalization (learn user's patterns)
+- Mobile companion app (break reminders on phone)
+- Eye strain detection using face landmarks
+- Hydration reminders
+
+### To-dos
+
+- [ ] Set up Electron with Next.js integration and IPC communication
+- [ ] Implement camera access and MediaPipe pose detection
+- [ ] Build posture analysis algorithms (slouch, head orientation, time thresholds)
+- [ ] Create work/rest timer system with UI and state management
+- [ ] Integrate OpenAI GPT-4o-mini for contextual response generation
+- [ ] Implement Windows TTS integration via Electron
+- [ ] Build alert manager with throttling and response caching
+- [ ] Create settings page with customization options and API key storage
+- [ ] Implement local data storage and statistics tracking/visualization
+- [ ] Test performance, optimize CPU usage, and add error handling<!-- 2c4bb830-71d1-4783-84d8-42f0de43f3a8 8d5ba448-cd53-445c-97cb-959fdef4edeb -->
+# Focus Assistant Desktop App Plan
+
+## Architecture Overview
+
+**Desktop Application:** Electron + Next.js (cross-platform: Windows, Mac, Linux)
+
+**Camera Processing:** MediaPipe Pose Detection (local, browser-based ML)
+
+**AI Responses:** Pre-written message library (default) + Optional OpenAI GPT-4o-mini API (user provides own key)
+
+**Audio Output:** Platform-specific native TTS (Windows Speech API, macOS Speech Synthesis, Linux espeak)
+
+**Privacy-First:** All video processing stays local on user's device, no authentication required
+
+## Tech Stack
+
+- **Frontend:** Next.js 14+ (React) with TypeScript
+- **Desktop Wrapper:** Electron (for native OS integration, cross-platform)
+- **Packaging:** electron-builder (creates installers for Windows, Mac, Linux)
+- **IPC Communication:** Context Bridge pattern (secure main/renderer communication)
+- **ML Library:** MediaPipe Pose Detection (TensorFlow.js, runs locally)
+- **State Management:** Zustand (lightweight, performant, with persist middleware)
+- **UI Components:** shadcn/ui (already configured) + Tailwind CSS
+- **Database:** SQLite via better-sqlite3 (synchronous, fast, single-file database)
+- **TTS:** Platform-specific native TTS (Windows SAPI, macOS Speech Synthesis, Linux espeak)
+- **APIs:** OpenAI GPT-4o-mini (optional, user provides own key)
+
+## Core Features to Build
+
+### 1. Camera Access & Permission Management
+
+- Request camera permissions via Electron's native dialog
+- Display camera feed in app (preview mode)
+- Privacy indicator when camera is active
+- Toggle to pause monitoring
+
+### 2. Posture & Focus Detection System
+
+**MediaPipe Implementation:**
+
+- Detect key body landmarks (shoulders, head, spine alignment)
+- Track head orientation (looking away, down at phone)
+- Calculate slouch angle from shoulder/spine positions
+- Implement time-based thresholds (30 seconds default)
+
+**Detection Triggers:**
+
+- Slouching (shoulders hunched, head forward)
+- Looking away (head turned >45 degrees for 30+ seconds)
+- Looking down at phone (head tilted down significantly)
+- No presence detected (user left)
+
+### 3. Work/Rest Timer System
+
+- User-configurable work intervals (default: 25 minutes)
+- User-configurable rest intervals (default: 5 minutes)
+- Visual countdown timer display
+- Notifications at interval boundaries
+- Pause/resume/reset controls
+- Timer history/statistics
+
+### 4. AI-Powered Response Generation
+
+**OpenAI Integration:**
+
+- Send context to GPT-4o-mini: `{type: "slouching", duration: 45, sessionTime: 25, mood: "encouraging"}`
+- Generate varied, contextual messages
+- Cache recent responses to reduce API calls
+- Fallback to pre-written messages if API fails
+- User preference for tone (encouraging/strict/humorous)
+
+### 5. Text-to-Speech Audio System
+
+- Integrate Windows Speech Synthesis API via Electron
+- Voice selection (available Windows voices)
+- Volume and speed controls
+- Test voice button in settings
+
+### 6. Settings & Customization
+
+- Work/rest duration configuration
+- Detection sensitivity sliders
+- Alert frequency limits (don't spam user)
+- Voice and audio preferences
+- OpenAI API key input (user brings their own key)
+- Privacy controls and data usage display
+
+### 7. Dashboard & Statistics
+
+- Session history (work sessions completed)
+- Posture quality metrics over time
+- Focus time vs distraction time graphs
+- Weekly/monthly reports
+- Export data option
+
+## File Structure
+
+```
+FocusApp/
+├── electron/
+│   ├── main.js                 # Electron main process
+│   ├── preload.js             # Bridge between main/renderer
+│   └── tts.js                 # Windows TTS integration
+├── app/
+│   ├── dashboard/
+│   │   └── page.tsx           # Main dashboard with camera feed
+│   ├── settings/
+│   │   └── page.tsx           # Settings page
+│   ├── timer/
+│   │   └── page.tsx           # Work/rest timer view
+│   └── stats/
+│       └── page.tsx           # Statistics and history
+├── components/
+│   ├── camera-feed.tsx        # Camera preview component
+│   ├── posture-detector.tsx   # MediaPipe integration
+│   ├── work-timer.tsx         # Timer component
+│   ├── alert-system.tsx       # Visual alerts component
+│   └── settings-panel.tsx     # Settings UI
+├── lib/
+│   ├── mediapipe-pose.ts      # Posture detection logic
+│   ├── openai-client.ts       # OpenAI API integration
+│   ├── alert-manager.ts       # Alert logic & throttling
+│   ├── timer-engine.ts        # Work/rest timer logic
+│   └── storage.ts             # Local data persistence
+├── hooks/
+│   ├── use-camera.ts          # Camera access hook
+│   ├── use-posture.ts         # Posture detection hook
+│   └── use-timer.ts           # Timer management hook
+└── types/
+    └── index.ts               # TypeScript definitions
+```
+
+## Implementation Steps
+
+### Phase 1: Electron Setup
+
+1. Install Electron dependencies: `electron`, `electron-builder`, `concurrently`
+2. Configure `electron/main.js` with window creation and camera permissions
+3. Set up IPC communication between Electron and Next.js
+4. Configure build scripts in `package.json`
+5. Test basic Electron app launches Next.js correctly
+
+### Phase 2: Camera & MediaPipe Integration
+
+1. Install MediaPipe/TensorFlow.js: `@mediapipe/pose`, `@tensorflow/tfjs`
+2. Create camera access component with permission handling
+3. Implement MediaPipe Pose detection on video stream
+4. Calculate posture metrics (slouch detection algorithm)
+5. Implement head orientation tracking
+6. Add time-threshold logic (30-second default)
+
+### Phase 3: Work/Rest Timer
+
+1. Create timer state management (work/rest modes)
+2. Build countdown timer UI component
+3. Implement pause/resume/reset functionality
+4. Add timer completion notifications
+5. Store user preferences (work duration, rest duration)
+6. Integrate timer with detection system
+
+### Phase 4: Alert System
+
+1. Create alert manager with throttling (avoid spam)
+2. Integrate OpenAI GPT-4o-mini client
+3. Build prompt templates with context injection
+4. Implement response caching mechanism
+5. Add fallback messages for offline/API failure
+6. Create Windows TTS integration via Electron IPC
+7. Test audio playback and voice options
+
+### Phase 5: Settings & UI Polish
+
+1. Build settings page with all customization options
+2. Implement OpenAI API key secure storage
+3. Add voice preview and selection
+4. Create sensitivity adjustment controls
+5. Build privacy controls (pause monitoring, clear data)
+6. Add visual indicators (camera active, session status)
+
+### Phase 6: Statistics & Dashboard
+
+1. Implement local data storage (SQLite or JSON)
+2. Track session data (duration, alerts, posture quality)
+3. Create statistics visualization components
+4. Build history view with filtering
+5. Add data export functionality
+6. Create weekly/monthly summary reports
+
+### Phase 7: Testing & Optimization
+
+1. Test camera performance on different hardware
+2. Optimize MediaPipe processing (reduce CPU usage)
+3. Test alert timing and frequency
+4. Verify Windows TTS works correctly
+5. Add error handling and recovery
+6. Optimize app startup time and memory usage
+
+## Key Technical Considerations
+
+**Camera Processing Performance:**
+
+- Run MediaPipe at 15-30 FPS (balance accuracy vs CPU)
+- Use Web Workers if processing blocks UI
+- Implement frame skipping under high CPU load
+
+**Privacy & Security:**
+
+- Never store video frames or images
+- Keep all ML processing in memory only
+- Securely store OpenAI API key (Electron safeStorage)
+- Clear explanation of data usage in UI
+- Option to work completely offline (disable LLM)
+
+**Alert Intelligence:**
+
+- Don't alert more than once every 5 minutes for same issue
+- Respect user's break time (no alerts during rest periods)
+- Progressive alerts (gentle reminder → stronger nudge)
+- Learn user patterns (morning sluggishness vs afternoon energy)
+
+**Offline Functionality:**
+
+- Posture detection works completely offline
+- Timers work offline
+- TTS works offline (Windows built-in)
+- Only LLM responses need internet
+- Cache common responses for offline use
+
+## Cost Breakdown
+
+**Development:**
+
+- Free (using existing tools and libraries)
+
+**User Running Costs:**
+
+- Camera processing: Free (local)
+- Windows TTS: Free (built-in)
+- OpenAI API: ~$0.50/month per user (assuming 100 alerts/day)
+- Total: **~$0.50/month** per user
+
+**Optional Cost Optimizations:**
+
+- Pre-generate 100 varied responses during onboarding (one-time $0.05 cost)
+- Use these cached responses, only generate new ones occasionally
+- Could reduce ongoing cost to near-zero while maintaining variety
+
+## User Experience Flow
+
+1. **First Launch:**
+
+   - Onboarding: Explain privacy model (local processing)
+   - Request camera permission
+   - Enter OpenAI API key (or use pre-written messages)
+   - Set work/rest preferences (default: 25/5 minutes)
+   - Calibration: Sit in good posture for baseline
+
+2. **Daily Use:**
+
+   - Start work session from dashboard
+   - Camera monitors in background (small preview visible)
+   - Timer counts down work interval
+   - Gentle alerts when posture degrades
+   - Break reminders at interval end
+   - Statistics update in real-time
+
+3. **Settings Access:**
+
+   - Pause monitoring temporarily
+   - Adjust sensitivity and timing
+   - Change voice/audio preferences
+   - View privacy information
+   - Export data
+
+## Future Enhancement Ideas
+
+- Multi-monitor detection (looking at second screen)
+- Keyboard/mouse activity correlation (typing vs idle)
+- Desk exercises suggestions during breaks
+- Integration with calendar (no alerts during meetings)
+- Machine learning personalization (learn user's patterns)
+- Mobile companion app (break reminders on phone)
+- Eye strain detection using face landmarks
+- Hydration reminders
+
+### To-dos
+
+- [ ] Set up Electron with Next.js integration and IPC communication
+- [ ] Implement camera access and MediaPipe pose detection
+- [ ] Build posture analysis algorithms (slouch, head orientation, time thresholds)
+- [ ] Create work/rest timer system with UI and state management
+- [ ] Integrate OpenAI GPT-4o-mini for contextual response generation
+- [ ] Implement Windows TTS integration via Electron
+- [ ] Build alert manager with throttling and response caching
+- [ ] Create settings page with customization options and API key storage
+- [ ] Implement local data storage and statistics tracking/visualization
+- [ ] Test performance, optimize CPU usage, and add error handling

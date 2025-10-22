@@ -1,0 +1,92 @@
+---
+alwaysApply: true
+---
+
+# shadcn/ui Components - STRICT REQUIREMENT
+
+## **CRITICAL: UI Component Policy**
+
+**This project uses shadcn/ui EXCLUSIVELY for ALL UI elements.**
+
+### Absolute Rules
+
+1. **ONLY use shadcn/ui components** for any UI element in this project
+2. **NEVER create custom UI components** (buttons, inputs, cards, dialogs, etc.)
+3. **NEVER write custom styling** for UI primitives that shadcn/ui provides
+4. **ALWAYS check** if shadcn/ui has a component before creating anything custom
+
+### Installation Commands
+
+**If shadcn/ui is not initialized in the project:**
+```bash
+npx shadcn@latest init
+```
+
+**To install a specific component (example: button):**
+```bash
+npx shadcn@latest add button
+```
+
+**To install multiple components at once:**
+```bash
+npx shadcn@latest add button card dialog input
+```
+
+### Available shadcn/ui Components
+
+shadcn/ui provides components for virtually all common UI needs:
+- **Forms**: Input, Textarea, Select, Checkbox, Radio, Switch, Slider, Calendar, Date Picker
+- **Layout**: Card, Separator, Tabs, Accordion, Collapsible, Sheet, Dialog, Drawer
+- **Navigation**: Navigation Menu, Menubar, Dropdown Menu, Context Menu, Breadcrumb
+- **Feedback**: Alert, Alert Dialog, Toast, Progress, Skeleton, Badge
+- **Data Display**: Table, Avatar, Tooltip, Popover, Hover Card, Command
+- **Buttons**: Button, Toggle, Toggle Group
+- **And many more...**
+
+### Workflow When Building UI
+
+1. **Identify the UI element** you need (e.g., "I need a button")
+2. **Check if shadcn/ui has it**: Visit https://ui.shadcn.com/docs/components
+3. **Install the component**: Run `npx shadcn@latest add [component-name]`
+4. **Use the component**: Import and use it in your code
+5. **Customize via props**: Use the component's built-in props and variants
+
+### Example: Adding a Button
+
+```bash
+# Install the button component
+npx shadcn@latest add button
+```
+
+```tsx
+// Use it in your component
+import { Button } from "@/components/ui/button"
+
+export function MyComponent() {
+  return (
+    <Button variant="default" size="lg">
+      Click Me
+    </Button>
+  )
+}
+```
+
+### What If shadcn/ui Doesn't Have It?
+
+If you genuinely need a UI element that shadcn/ui doesn't provide:
+1. **First, double-check** - shadcn/ui has 50+ components
+2. **Check if you can compose** existing components to achieve the goal
+3. **Only then** consider if a custom component is truly necessary
+4. **Consult the user** before creating any custom UI
+
+### Why This Rule Exists
+
+- **Consistency**: All UI follows the same design system
+- **Accessibility**: shadcn/ui components are built with accessibility in mind
+- **Maintainability**: Pre-built, tested components reduce bugs
+- **Speed**: Don't reinvent the wheel for common UI patterns
+- **Quality**: Professional, polished components out of the box
+
+---
+
+**Remember: When in doubt, check shadcn/ui first. It probably has what you need.**

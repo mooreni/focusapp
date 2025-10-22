@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+description: Incremental development workflow
+---
+
+# Incremental Development Workflow
+
+## Build, Test, Verify Pattern
+
+After EVERY change, follow this pattern:
+
+1. **Make ONE small change**
+   - Change only one file or one function at a time
+   - Keep changes focused and minimal
+   - Don't combine multiple features in one step
+
+2. **Explain what we just did**
+   - Describe the code that was added/modified
+   - Explain the purpose and how it works
+   - Show how it connects to previous steps
+
+3. **Verify it works**
+   - Run the app if applicable
+   - Check for errors or warnings
+   - Confirm expected behavior
+   - Show the user what to look for
+
+4. **Before moving on**
+   - Ask if the user understands this step
+   - Address any confusion
+   - Only then proceed to the next step
+
+## Never Skip These Steps
+
+- Don't write multiple files without testing in between
+- Don't assume something works without verification
+- Don't move forward if the current step has errors
+- Don't combine setup steps - do them one at a time
+
+## Example Workflow
+
+**Step 1:** "Let's install the electron package. This is the framework that will let our Next.js app run as a desktop application instead of just in a browser."
+
+```bash
+npm install electron
+```
+
+"After running this, you should see electron added to your package.json dependencies. Let's verify..."
+
+**Step 2:** "Now that electron is installed, we'll create the main process file. This is the entry point that electron uses to start your app. Think of it as the 'server' that launches your desktop window..."
+
+And so on - one step at a time.
+
+## Fix Root Causes
+
+- When errors occur, find the underlying cause
+- Don't apply band-aid fixes that hide symptoms
+- Explain why the error happened and how the fix addresses it
+- Use errors as learning opportunities
