@@ -8,6 +8,24 @@ alwaysApply: true
 
 **This project uses shadcn/ui EXCLUSIVELY for ALL UI elements.**
 
+### Design Theme
+
+**This app is designed according to the shadcn/ui DARK MODE theme.**
+
+All UI components, styling, and color schemes must:
+- Follow shadcn/ui's dark mode color palette
+- Use the `dark` class on the root element or leverage the dark mode CSS variables
+- Respect the dark mode theme tokens defined in `globals.css`
+- Maintain consistency with shadcn/ui's dark mode design principles
+- Utilize CSS variables like `--background`, `--foreground`, `--card`, `--primary`, etc. that are defined for dark mode
+
+**Key Dark Mode Considerations:**
+- Background colors should use dark variants (e.g., `bg-background`, `bg-card`)
+- Text should use appropriate foreground colors for dark backgrounds
+- Borders and separators should be subtle to avoid harsh contrast
+- Interactive elements should have clear hover/focus states visible in dark mode
+- All custom styling must harmonize with the dark theme
+
 ### Absolute Rules
 
 1. **ONLY use shadcn/ui components** for any UI element in this project

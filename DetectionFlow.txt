@@ -1,0 +1,41 @@
+1. USER STARTS CAMERA
+   └─> camera-feed.tsx calls startCamera()
+       └─> use-camera.ts requests browser permission
+           └─> Browser shows permission dialog
+               └─> MediaStream created and returned
+
+2. VIDEO STREAM READY
+   └─> camera-feed.tsx connects stream to <video> element
+       └─> camera-feed.tsx calls onStreamReady(stream)
+           └─> posture-detector.tsx receives stream
+               └─> Waits for video metadata (width/height)
+                   └─> Calls startDetection(videoElement)
+
+3. DETECTION STARTS
+   └─> use-posture.ts starts 10 FPS interval
+       └─> Every 100ms: calls detectPose(videoElement)
+           └─> mediapipe-pose.ts processes frame
+               ├─> ML model finds 33 landmarks
+               ├─> Calculates angles (slouch, head tilt, etc.)
+               ├─> Compares to calibration baseline (if exists)
+               └─> Returns PostureAnalysis
+                   └─> use-posture.ts checks if significant change
+                       └─> Updates state (triggers React re-render)
+                           └─> posture-detector.tsx shows new results
+
+4. USER CALIBRATES
+   └─> posture-detector.tsx: User clicks "Calibrate Now"
+       └─> use-posture.ts calls calibrate()
+           └─> Captures current landmarks
+               └─> mediapipe-pose.ts saves as baseline
+                   └─> Sets isCalibrated = true
+                       └─> Detection loop starts showing results in UI
+
+5. POSTURE ISSUE DETECTED
+   └─> mediapipe-pose.ts: slouchAngle > baseline + threshold
+       └─> Returns posture.type = 'slouching'
+           └─> use-posture.ts updates result state
+               └─> posture-detector.tsx re-renders
+                   ├─> Badge turns red "Slouching Detected"
+                   ├─> Metrics update (slouch angle shown)
+                   └─> Tip appears: "Try sitting up straight...
